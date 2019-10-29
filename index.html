@@ -11,14 +11,54 @@
     </style>
   </head>
   <body>
-    <button onclick="getDeviceId()">getDeviceId</button>
+    <button onclick="getDeviceId1()">getDeviceId from 30.25.76.72</button>
+    <button onclick="getDeviceId2()">getDeviceId from 127.0.0.1</button>
+    <button onclick="getDeviceId3()">getDeviceId from localhost</button>
     <div id="result"></div>
     <div id="error"></div>
     <div id="exception"></div>
     <script>
-      function getDeviceId() {
+      function getDeviceId1() {
         try {
           fetch('http://30.25.76.72:8080/user/getDeviceId')
+            .then(function(response) {
+              return response.text()
+            })
+            .then(function(body) {
+              var result = document.getElementById('result');
+              result.innerHTML = body
+            })
+            .catch(function(err) {
+              var error = document.getElementById('error');
+              error.innerHTML = err;
+            })
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = exp;
+        }
+      }
+      function getDeviceId2() {
+        try {
+          fetch('http://127.0.0.1:8080/user/getDeviceId')
+            .then(function(response) {
+              return response.text()
+            })
+            .then(function(body) {
+              var result = document.getElementById('result');
+              result.innerHTML = body
+            })
+            .catch(function(err) {
+              var error = document.getElementById('error');
+              error.innerHTML = err;
+            })
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = exp;
+        }
+      }
+      function getDeviceId3() {
+        try {
+          fetch('http://localhost:8080/user/getDeviceId')
             .then(function(response) {
               return response.text()
             })
