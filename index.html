@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>id打通</title>
+    <style>
+      .error {
+        color: red;
+      }
+      .exception {
+        color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <button onclick="getDeviceId()">getDeviceId</button>
+    <div id="result"></div>
+    <div id="error"></div>
+    <div id="exception"></div>
+    <script>
+      function getDeviceId() {
+        try {
+          fetch('http://30.25.76.72:8080/user/getDeviceId')
+            .then(function(response) {
+              return response.text()
+            })
+            .then(function(body) {
+              var result = document.getElementById('result');
+              result.innerHTML = body
+            })
+            .catch(function(err) {
+              var error = document.getElementById('error');
+              error.innerHTML = err;
+            })
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = exp;
+        }
+      }
+    </script>
+  </body>
+</html>
