@@ -14,6 +14,7 @@
     <button onclick="getDeviceId1()">getDeviceId from 30.25.76.72</button>
     <button onclick="getDeviceId2()">getDeviceId from 127.0.0.1</button>
     <button onclick="getDeviceId3()">getDeviceId from localhost</button>
+    <button onclick="getDeviceId4()">getDeviceId from https://127.0.0.1</button>
     <div id="result"></div>
     <div id="error"></div>
     <div id="exception"></div>
@@ -30,11 +31,13 @@
             })
             .catch(function(err) {
               var error = document.getElementById('error');
-              error.innerHTML = err;
+              var errMsg = err.message + '----' + err.description;
+              error.innerHTML = errMsg;
             })
         } catch (exp) {
           var exception = document.getElementById('exception');
-          exception.innerHTML = exp;
+          var errMsg = exp.message + '----' + exp.description;
+          exception.innerHTML = errMsg;
         }
       }
       function getDeviceId2() {
@@ -49,11 +52,13 @@
             })
             .catch(function(err) {
               var error = document.getElementById('error');
-              error.innerHTML = err;
+              var errMsg = err.message + '----' + err.description;
+              error.innerHTML = errMsg;
             })
         } catch (exp) {
           var exception = document.getElementById('exception');
-          exception.innerHTML = exp;
+          var errMsg = exp.message + '----' + exp.description;
+          exception.innerHTML = errMsg;
         }
       }
       function getDeviceId3() {
@@ -68,11 +73,34 @@
             })
             .catch(function(err) {
               var error = document.getElementById('error');
-              error.innerHTML = err;
+              var errMsg = err.message + '----' + err.description;
+              error.innerHTML = errMsg;
             })
         } catch (exp) {
           var exception = document.getElementById('exception');
-          exception.innerHTML = exp;
+          var errMsg = exp.message + '----' + exp.description;
+          exception.innerHTML = errMsg;
+        }
+      }
+      function getDeviceId4() {
+        try {
+          fetch('https://127.0.0.1:8080/user/getDeviceId')
+            .then(function(response) {
+              return response.text()
+            })
+            .then(function(body) {
+              var result = document.getElementById('result');
+              result.innerHTML = body
+            })
+            .catch(function(err) {
+              var error = document.getElementById('error');
+              var errMsg = err.message + '----' + err.description;
+              error.innerHTML = errMsg;
+            })
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          var errMsg = exp.message + '----' + exp.description;
+          exception.innerHTML = errMsg;
         }
       }
     </script>
