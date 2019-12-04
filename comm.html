@@ -1,0 +1,257 @@
+<html>
+  <head>
+    <title>id打通</title>
+    <style>
+      #error {
+        color: red;
+      }
+      #exception {
+        color: red;
+      }
+    </style>
+      <script>
+        function ajax(params) { 
+  params = params || {}; 
+  params.data = params.data || {}; 
+  // 判断是ajax请求还是jsonp请求
+  var json = params.jsonp ? jsonp(params) : json(params); 
+  // ajax请求 
+  function json(params) {
+    // 请求方式，默认是GET
+    params.type = (params.type || 'GET').toUpperCase();
+    // 避免有特殊字符，必须格式化传输数据
+    params.data = formatParams(params.data); 
+    var xhr = null;  
+  
+    try {
+      // 实例化XMLHttpRequest对象 
+      if(window.XMLHttpRequest) { 
+        xhr = new XMLHttpRequest(); 
+      } else { 
+        // IE6及其以下版本 
+        xhr = new ActiveXObjcet('Microsoft.XMLHTTP'); 
+      };
+    } catch (error) {
+    }
+
+    // 监听事件，只要 readyState 的值变化，就会调用 readystatechange 事件
+    xhr.onreadystatechange = function() {
+      // readyState属性表示请求/响应过程的当前活动阶段，4为完成，已经接收到全部响应数据
+      if(xhr.readyState == 4) { 
+        var status = xhr.status; 
+        // status：响应的HTTP状态码，以2开头的都是成功
+        if(status >= 200 && status < 300) {
+          var response = '';
+          // 判断接受数据的内容类型
+          var type = xhr.getResponseHeader('Content-Type'); 
+          if(type && type.indexOf('xml') !== -1 && xhr.responseXML) { 
+            response = xhr.responseXML; //Document对象响应 
+          } else {
+            try {
+              response = JSON.parse(xhr.responseText); //JSON响应 
+            } catch (error) {
+              response = {}
+            }
+          }; 
+          // 成功回调函数
+          params.success && params.success(response); 
+        } else {
+          // fetch(params);
+          params.fail && params.fail(status); 
+        } 
+      }; 
+    }; 
+
+    xhr.open(params.type, params.url + '?' + params.data, true); 
+    xhr.send(null); 
+  }
+
+  // jsonp请求 
+  function jsonp(params) {
+    //创建script标签并加入到页面中 
+    var callbackName = params.jsonp || 'callback'; 
+    var head = document.getElementsByTagName('head')[0]; 
+    // 设置传递给后台的回调参数名 
+    params.data['callback'] = callbackName; 
+    var data = formatParams(params.data); 
+    var script = document.createElement('script'); 
+    head.appendChild(script);  
+    
+    //创建jsonp回调函数 
+    window[callbackName] = function(json) { 
+    head.removeChild(script); 
+    clearTimeout(script.timer); 
+    window[callbackName] = null; 
+      params.success && params.success(json); 
+    };  
+
+    //发送请求 
+    script.src = params.url + '?' + data;  
+
+    //为了得知此次请求是否成功，设置超时处理 
+    if(params.time) { 
+      script.timer = setTimeout(function() { 
+        window[callbackName] = null; 
+        head.removeChild(script); 
+        params.fail && params.fail({
+          message: '超时' 
+        }); 
+      }, params.time); 
+    } 
+  };  
+  
+  //格式化参数 
+  function formatParams(data) { 
+    var arr = []; 
+    for(var name in data) { 
+      arr.push(encodeURIComponent(name) + '=' + encodeURIComponent(data[name])); 
+    }; 
+
+    // 添加一个随机数，防止缓存 
+    arr.push('v=' + random()); 
+    return arr.join('&'); 
+  }
+
+  // 获取随机数 
+  function random() { 
+    return Math.floor(Math.random() * 10000 + 500); 
+  }
+}
+      </script>
+  </head>
+  <body>
+    <button onclick="getAppInfo1()">http + xhr</button>
+    <button onclick="getAppInfo2()">http + jsonp</button>
+    <button onclick="getAppInfo3()">https + xhr</button>
+    <button onclick="getAppInfo4()">https + jsonp</button>
+    <button onclick="reload()">reload</button>
+    <div id="result"></div>
+    <div id="error"></div>
+    <div id="exception"></div>
+    <script>
+      function reload() {
+        window.location.reload(true);
+      }
+
+      var DEFAULT_PORT = 7000;
+      var MAX_PORT = 7050;
+      var PORT_STEP = 1;
+
+      function getAppInfo1(port) {
+        try {
+          port = port || DEFAULT_PORT;
+          ajax({
+            url: 'http://127.0.0.1:' + port + '/getAppInfo',
+            // jsonp: 'callback',
+            // time: 2000,
+            success: function (res) {
+              var info = res.data;
+              window.localStorage.setItem('umAppInfo', info);
+              var result = document.getElementById('result');
+              result.innerHTML = body;
+            },
+            fail: function(res) {
+              if (port < 7100) {
+                port += PORT_STEP;
+                getAppInfo1(port); 
+              } else {
+                var exception = document.getElementById('exception');
+                exception.innerHTML = 'fail: ' + res;
+              }
+            }
+          });
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = 'exception: ' + exp;
+        }
+      }
+
+      function getAppInfo2(port) {
+        try {
+          port = port || DEFAULT_PORT;
+          ajax({
+            url: 'http://127.0.0.1:' + port + '/getAppInfo',
+            jsonp: 'callback',
+            time: 2000,
+            success: function (res) {
+              var info = res.data;
+              window.localStorage.setItem('umAppInfo', info);
+              var result = document.getElementById('result');
+              result.innerHTML = body;
+            },
+            fail: function(res) {
+              if (port < 7100) {
+                port += PORT_STEP;
+                getAppInfo2(port); 
+              } else {
+                var exception = document.getElementById('exception');
+                exception.innerHTML = 'fail: ' + res;
+              }
+            }
+          });
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = 'exception: ' + exp;
+        }
+      }
+
+      function getAppInfo3(port) {
+        try {
+          port = port || DEFAULT_PORT;
+          ajax({
+            url: 'https://127.0.0.1:' + port + '/getAppInfo',
+            // jsonp: 'callback',
+            // time: 2000,
+            success: function (res) {
+              var info = res.data;
+              window.localStorage.setItem('umAppInfo', info);
+              var result = document.getElementById('result');
+              result.innerHTML = body;
+            },
+            fail: function(res) {
+              if (port < 7100) {
+                port += PORT_STEP;
+                getAppInfo3(port); 
+              } else {
+                var exception = document.getElementById('exception');
+                exception.innerHTML = 'fail: ' + res;
+              }
+            }
+          });
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = 'exception: ' + exp;
+        }
+      }
+
+      function getAppInfo4(port) {
+        try {
+          port = port || DEFAULT_PORT;
+          ajax({
+            url: 'https://127.0.0.1:' + port + '/getAppInfo',
+            jsonp: 'callback',
+            time: 2000,
+            success: function (res) {
+              var info = res.data;
+              window.localStorage.setItem('umAppInfo', info);
+              var result = document.getElementById('result');
+              result.innerHTML = body;
+            },
+            fail: function(res) {
+              if (port < 7100) {
+                port += PORT_STEP;
+                getAppInfo4(port); 
+              } else {
+                var exception = document.getElementById('exception');
+                exception.innerHTML = 'fail: ' + res;
+              }
+            }
+          });
+        } catch (exp) {
+          var exception = document.getElementById('exception');
+          exception.innerHTML = 'exception: ' + exp;
+        }
+      }
+    </script>
+  </body>
+</html>
